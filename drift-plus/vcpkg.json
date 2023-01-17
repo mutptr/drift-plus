@@ -1,6 +1,12 @@
 {
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "name": "drift-plus",
-  "version": "0",
-  "dependencies": []
+  "version": "2023-01-17",
+  "builtin-baseline": "e51afe4695ebf5e6c6f523dbd3bb518db1970531",
+  "dependencies": [
+    {
+      "name": "spdlog",
+      "features": [ "wchar" ]
+    }
+  ]
 }

@@ -8,5 +8,18 @@
 #define PCH_H
 
 // 여기에 미리 컴파일하려는 헤더 추가
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+
+#include <Windows.h>
+#include <TlHelp32.h>
+
+#include <stdint.h>
+#include <string>
+
+#ifdef _DEBUG
+#define SPDLOG_ACTIVE_LEVEL 1
+#endif
+#include <spdlog/spdlog.h>
 
 #endif //PCH_H
