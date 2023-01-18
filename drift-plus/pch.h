@@ -17,13 +17,24 @@
 #include <stdint.h>
 #include <string>
 #include <array>
+#include <thread>
 
 #define JM_XORSTR_DISABLE_AVX_INTRINSICS
 #include <xorstr.hpp>
 
+//#define PLOG_DISABLE_LOGGING
+#define PLOG_OMIT_LOG_DEFINES
 #include <plog/Log.h>
 #include <plog/Init.h>
 #include <plog/Formatters/MessageOnlyFormatter.h>
+#include <plog/Formatters/FuncMessageFormatter.h>
+#include <plog/Formatters/TxtFormatter.h>
 #include <plog/Initializers/ConsoleInitializer.h>
+
+
+#include <nana/gui.hpp>
+#include <nana/gui/widgets/checkbox.hpp>
+#include <nana/gui/widgets/slider.hpp>
+#include <nana/gui/widgets/textbox.hpp>
 
 #endif //PCH_H

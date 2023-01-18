@@ -5,6 +5,7 @@
   "builtin-baseline": "e51afe4695ebf5e6c6f523dbd3bb518db1970531",
   "dependencies": [
     "xorstr",
-    "plog"
+    "plog",
+    "nana"
   ]
 }

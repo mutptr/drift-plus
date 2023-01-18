@@ -7,7 +7,7 @@ public:
 	blackcipher();
 	~blackcipher();
 
-	bool operator()() const;
+	operator bool() const;
 
 private:
 	HANDLE handle_ = nullptr;

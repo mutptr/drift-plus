@@ -1,10 +1,10 @@
-#pragma once
+﻿#pragma once
 
 namespace offset
 {
 	namespace client
 	{
-		constexpr uint32_t booster = 0x1404164;
+		constexpr uint32_t booster = 0x140415E;
 	}
 	namespace client::physx3
 	{
