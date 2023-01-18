@@ -4,9 +4,7 @@
   "version": "2023-01-17",
   "builtin-baseline": "e51afe4695ebf5e6c6f523dbd3bb518db1970531",
   "dependencies": [
-    {
-      "name": "spdlog",
-      "features": [ "wchar" ]
-    }
+    "xorstr",
+    "plog"
   ]
 }

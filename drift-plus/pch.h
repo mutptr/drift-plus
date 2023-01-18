@@ -16,10 +16,14 @@
 
 #include <stdint.h>
 #include <string>
+#include <array>
 
-#ifdef _DEBUG
-#define SPDLOG_ACTIVE_LEVEL 1
-#endif
-#include <spdlog/spdlog.h>
+#define JM_XORSTR_DISABLE_AVX_INTRINSICS
+#include <xorstr.hpp>
+
+#include <plog/Log.h>
+#include <plog/Init.h>
+#include <plog/Formatters/MessageOnlyFormatter.h>
+#include <plog/Initializers/ConsoleInitializer.h>
 
 #endif //PCH_H
