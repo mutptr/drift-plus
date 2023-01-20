@@ -7,8 +7,8 @@
 
 #define PROCESS_NAME xorstr_(L"KartDrift-Win64-Shipping.exe")
 
-#define BOOSTER_ASM			"F3 0F 59 15 F8 04 00 00 F3 0F 5E C1 F3 0F 59 C2 F3 0F 58 C3 F3 0F 11 41 1C C3"
-#define BOOSTER_ORIGIN_ASM	"F3 0F 5E C1 F3 0F 59 C2 F3 0F 58 C3 F3 0F"
+#define BOOSTER_ASM			"45 84 C0 74 0A 0F 28 C2 F3 0F 58 C2 0F 28 D0 F3 0F 58 49 18 F3 0F 59 15 E4 04 00 00 FF 25 00 00 00 00 3D 49 40 41 01 00 00 00"
+#define BOOSTER_ORIGIN_ASM	"45 84 C0 74 0A 0F 28 C2 F3 0F 58 C2 0F 28"
 
 #define SPEED_ASM			"F3 0F 59 05 F8 04 00 00 F3 0F 59 F0 0F 28 FA F3 0F 59 F8 44 0F 28 C3 FF 25 00 00 00 00 F5 3F D7 11 FE 7F 00 00"
 #define SPEED_ORIGIN_ASM	"F3 0F 59 F0 0F 28 FA F3 0F 59 F8 44 0F 28"
@@ -51,6 +51,7 @@ engine::engine()
 		WriteProcessMemory(handle_, (LPVOID)booster_value_alloc_, &default_value, sizeof(default_value), nullptr);
 
 		constexpr auto booster_asm = util::array_from_string(BOOSTER_ASM);
+		*(uint64_t*)(booster_asm.data() + 0x1C + 6) = client_ + offset::client::booster + 0x14;
 		WriteProcessMemory(handle_, (LPVOID)(booster_alloc_), booster_asm.data(), booster_asm.size(), nullptr);
 
 		constexpr auto jmp_asm = util::array_from_string(JMP_ASM);
@@ -116,16 +117,7 @@ void engine::disable_crash_guard()
 
 void engine::booster(float value)
 {
-	constexpr float booster_1_default = 3.0f;
-	constexpr float booster_2_default = 1.5f;
-
 	WriteProcessMemory(handle_, (LPVOID)booster_value_alloc_, &value, sizeof(value), nullptr);
-
-	const float booster_1 = booster_1_default * value;
-	WriteProcessMemory(handle_, (LPVOID)(client_ + offset::client::booster_value_1), &booster_1, sizeof(booster_1), nullptr);
-
-	const float booster_2 = booster_2_default * value;
-	WriteProcessMemory(handle_, (LPVOID)(client_ + offset::client::booster_value_2), &booster_2, sizeof(booster_2), nullptr);
 }
 
 void engine::speed(float value)
