@@ -78,6 +78,10 @@ engine::engine()
 
 engine::~engine()
 {
+	disable_crash_guard();
+	booster(1.0f);
+	speed(1.0f);
+
 	if (booster_alloc_)
 	{
 		constexpr auto origin_asm = util::array_from_string(BOOSTER_ORIGIN_ASM);
@@ -92,7 +96,7 @@ engine::~engine()
 		VirtualFreeEx(handle_, (LPVOID)speed_alloc_, 0, MEM_RELEASE);
 	}
 
-	disable_crash_guard();
+	
 
 	if (handle_)
 		CloseHandle(handle_);
