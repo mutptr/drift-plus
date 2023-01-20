@@ -27,10 +27,15 @@ blackcipher::blackcipher()
 	PLOGI << xorstr_("NGS hook address: ") << std::hex << hook_address;
 
 	uint32_t checksum = 0;
-	uint32_t origin_checksum = *(uint32_t*)(util::array_from_string(ORIGIN_ASM).data());
-	uint32_t origin_checksum2 = *(uint32_t*)(util::array_from_string(JMP_ASM).data());
+	constexpr uint32_t origin_checksum = util::get_4byte_from_array<0>(util::array_from_string(BYPASS_ASM));
+	constexpr uint32_t origin_checksum2 = util::get_4byte_from_array<0>(util::array_from_string(JMP_ASM));
 	ReadProcessMemory(handle_, (LPCVOID)hook_address, &checksum, sizeof(checksum), nullptr);
-	if (checksum != origin_checksum && checksum != origin_checksum2)
+	if (checksum == origin_checksum2)
+	{
+		alloc_ = (uint8_t*)1;
+		return;
+	}
+	if (checksum != origin_checksum)
 	{
 		PLOGI << xorstr_("NGS 버전이 다릅니다.");
 		return;
@@ -40,11 +45,11 @@ blackcipher::blackcipher()
 	if (!alloc_)
 		return;
 
-	auto bypass_asm = util::array_from_string(BYPASS_ASM);
+	constexpr auto bypass_asm = util::array_from_string(BYPASS_ASM);
 	*(uint64_t*)(bypass_asm.data() + 0x77 + 6) = hook_address + 0x1C;
 	WriteProcessMemory(handle_, alloc_, bypass_asm.data(), bypass_asm.size(), nullptr);
 
-	auto jmp_asm = util::array_from_string(JMP_ASM);
+	constexpr auto jmp_asm = util::array_from_string(JMP_ASM);
 	*(uint64_t*)(jmp_asm.data() + 6) = (uint64_t)alloc_;
 	WriteProcessMemory(handle_, (LPVOID)hook_address, jmp_asm.data(), jmp_asm.size(), nullptr);
 }

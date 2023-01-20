@@ -8,20 +8,8 @@ mainform::mainform(engine* eng)
 	: nana::form{ nana::API::make_center(400, 300), appear::decorate<appear::minimize>{} },
 	eng{ eng }
 {
-	booster_.move({ 20, 20, 360, 25 });
-	booster_.caption("부스터");
-	auto booster_click = [&]
-	{
-		if (!booster_.checked())
-		{
-			eng->booster(default_value_);
-		}
-	};
-	booster_.events().click(booster_click);
+	caption(xorstr_("drift-plus"));
 
-	booster_value_.move({ 20, 50, 360, 25 });
-	booster_value_.caption("1.0");
-	booster_value_.multi_lines(false);
 	auto booster_value_click = [&]
 	{
 		if (booster_.checked())
@@ -31,15 +19,46 @@ mainform::mainform(engine* eng)
 				eng->booster(val);
 		}
 	};
+
+	booster_.move({ 20, 20, 160, 25 });
+	booster_.caption(xorstr_("부스터"));
+	auto booster_click = [&, booster_value_click]
+	{
+		if (booster_.checked())
+		{
+			booster_value_click();
+		}
+		else
+		{
+			eng->booster(default_value_);
+		}
+	};
+	booster_.events().click(booster_click);
+
+	crash_guard_.move({ 200, 20, 160, 25 });
+	crash_guard_.caption(xorstr_("부스터 손실 제거"));
+	auto crash_guard_click = [&]
+	{
+		crash_guard_.checked() ?
+			eng->enable_crash_guard() :
+			eng->disable_crash_guard();
+	};
+	crash_guard_.events().click(crash_guard_click);
+
+
+	booster_value_.move({ 20, 50, 360, 25 });
+	booster_value_.caption(xorstr_("1.0"));
+	booster_value_.multi_lines(false);
 	booster_value_.events().text_changed(booster_value_click);
 
-	speed_.move({ 20, 80, 160, 25 });
-	speed_.caption("스피드");
-	speed_space_.move({ 200, 80, 160, 25 });
-	speed_space_.caption("Space");
 
-	speed_value_.move({ 20, 110, 360, 25 });
-	speed_value_.caption("1.0");
+	speed_.move({ 20, 100, 160, 25 });
+	speed_.caption(xorstr_("스피드"));
+	speed_space_.move({ 200, 100, 160, 25 });
+	speed_space_.caption(xorstr_("Space"));
+
+	speed_value_.move({ 20, 130, 360, 25 });
+	speed_value_.caption(xorstr_("1.0"));
 	speed_value_.multi_lines(false);
 
 	speed_t_ = std::thread{ [&]

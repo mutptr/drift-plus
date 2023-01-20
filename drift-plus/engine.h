@@ -6,6 +6,8 @@ public:
 	engine();
 	~engine();
 
+	void enable_crash_guard();
+	void disable_crash_guard();
 	void booster(float value);
 	void speed(float value);
 

@@ -25,4 +25,10 @@ namespace util
 		}
 		return vec;
 	}
+
+	template<size_t I, size_t N>
+	constexpr uint32_t get_4byte_from_array(std::array<uint8_t, N> arr)
+	{
+		return arr[I] | arr[I + 1] << 8 | arr[I + 2] << 16 | arr[I + 3] << 24;
+	}
 }

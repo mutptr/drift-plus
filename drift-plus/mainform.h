@@ -11,6 +11,7 @@ public:
 private:
 	engine* eng = nullptr;
 	nana::checkbox booster_{ *this };
+	nana::checkbox crash_guard_{ *this };
 	nana::textbox booster_value_{ *this };
 
 	nana::checkbox speed_{ *this };
