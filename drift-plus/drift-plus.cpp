@@ -13,6 +13,7 @@ int main()
 	if (!bc)
 	{
 		PLOGI << xorstr_(L"NGS 초기화에 실패하였습니다");
+		system("pause");
 		return -1;
 	}
 

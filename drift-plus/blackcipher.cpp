@@ -27,7 +27,7 @@ blackcipher::blackcipher()
 	PLOGI << xorstr_("NGS hook address: ") << std::hex << hook_address;
 
 	uint32_t checksum = 0;
-	constexpr uint32_t origin_checksum = util::get_4byte_from_array<0>(util::array_from_string(BYPASS_ASM));
+	constexpr uint32_t origin_checksum = util::get_4byte_from_array<0>(util::array_from_string(ORIGIN_ASM));
 	constexpr uint32_t origin_checksum2 = util::get_4byte_from_array<0>(util::array_from_string(JMP_ASM));
 	ReadProcessMemory(handle_, (LPCVOID)hook_address, &checksum, sizeof(checksum), nullptr);
 	if (checksum == origin_checksum2)
