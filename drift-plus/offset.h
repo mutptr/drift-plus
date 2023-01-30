@@ -14,6 +14,6 @@ namespace offset
 
 	namespace ngs
 	{
-		constexpr uint32_t hook = 0x125860C;
+		constexpr uint32_t hook = 0x133233D;
 	}
 }
