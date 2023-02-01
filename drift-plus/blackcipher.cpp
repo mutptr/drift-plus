@@ -7,9 +7,18 @@
 
 #define PROCESS_NAME xorstr_(L"blackcipher64.aes")
 
-#define BYPASS_ASM	"50 48 B8 5B 6D 4B 41 01 00 00 00 48 39 84 24 40 2F 00 00 0F 84 5C 00 00 00 48 B8 F9 A7 3B 41 01 00 00 00 48 39 84 24 40 2F 00 00 0F 84 44 00 00 00 48 B8 14 89 1A 41 01 00 00 00 48 39 84 24 40 2F 00 00 0F 84 2C 00 00 00 48 B8 28 7D 42 41 01 00 00 00 48 39 84 24 40 2F 00 00 0F 84 14 00 00 00 58 48 31 C0 48 FF C0 48 31 D2 48 81 C4 28 2F 00 00 5F 5E C3 58 9C 68 37 F6 88 7B 4C 89 14 24 4D 8B D2 53 50 48 B8 17 87 FF 75 00 00 00 00 FF 25 00 00 00 00 56 23 33 41 01 00 00 00"
-#define ORIGIN_ASM	"9C 68 37 F6 88 7B 4C 89 14 24 4D 8B D2 53"
+#define BYPASS_ASM	"50 48 B8 22 2F 39 41 01 00 00 00 48 39 84 24 40 2F 00 00 0F 84 44 00 00 00 48 B8 4B 23 10 41 01 00 00 00 48 39 84 24 40 2F 00 00 0F 84 2C 00 00 00 48 B8 5E 86 33 41 01 00 00 00 48 39 84 24 40 2F 00 00 0F 84 14 00 00 00 58 48 31 C0 48 FF C0 48 31 D2 48 81 C4 28 2F 00 00 5F 5E C3 58 9C 52 54 5A 48 83 C2 08 48 83 EA 08 48 87 14 24 5C 48 89 3C 24 48 8B FF 53 FF 25 00 00 00 00 28 86 25 41 01 00 00 00"
+#define ORIGIN_ASM	"58 9C 52 54 5A 48 83 C2 08 48 83 EA 08 48"
 #define JMP_ASM		"FF 25 00 00 00 00 CC CC CC CC CC CC CC CC"
+
+constexpr uint32_t write_file_hook = 0x125860C;
+
+
+template<size_t N>
+void blackcipher::crc(uint32_t offset, std::array<uint8_t, N>&& arr)
+{
+	WriteProcessMemory(handle_, (LPVOID)(base_ + offset), arr.data(), arr.size(), nullptr);
+}
 
 blackcipher::blackcipher()
 {
@@ -23,7 +32,7 @@ blackcipher::blackcipher()
 	if (!handle_)
 		return;
 
-	uintptr_t hook_address = base_ + offset::ngs::hook;
+	uintptr_t hook_address = base_ + write_file_hook;
 	PLOGI << xorstr_("NGS hook address: ") << std::hex << hook_address;
 
 	uint32_t checksum = 0;
@@ -52,18 +61,19 @@ blackcipher::blackcipher()
 	constexpr auto jmp_asm = util::array_from_string(JMP_ASM);
 	*(uint64_t*)(jmp_asm.data() + 6) = (uint64_t)alloc_;
 	WriteProcessMemory(handle_, (LPVOID)hook_address, jmp_asm.data(), jmp_asm.size(), nullptr);
+
+	crc(0x1BDFC0B, util::array_from_string("48 81 C4 B8 08 00 00 C3"));
+	crc(0x1131387, util::array_from_string("5F 5E 48 81 C4 38 11 00 00 C3"));
+	crc(0x1648520, util::array_from_string("5F 5E 48 81 C4 58 07 00 00 C3"));
+	crc(0x11658AF, util::array_from_string("5F 5E 48 81 C4 78 17 00 00 C3"));
+	crc(0x1807AFE, util::array_from_string("5F 5E 48 81 C4 88 36 00 00 C3"));
+	crc(0x2290DD8, util::array_from_string("48 31 C0 48 81 C4 E8 09 00 00 C3"));
+	crc(0x1E7B4B7, util::array_from_string("5F 48 81 C4 40 10 00 00 C3"));
+	crc(0x22EE014, util::array_from_string("48 31 C0 FE C0 48 81 C4 D8 11 00 00 C3"));
 }
 
 blackcipher::~blackcipher()
 {
-	/*if (alloc_)
-	{
-		uintptr_t hook_address = base_ + offset::ngs::hook;
-		auto origin_asm = util::array_from_string(ORIGIN_ASM);
-		WriteProcessMemory(handle_, (LPVOID)hook_address, origin_asm.data(), origin_asm.size(), nullptr);
-		VirtualFreeEx(handle_, alloc_, 0, MEM_RELEASE);
-	}*/
-
 	if (handle_)
 		CloseHandle(handle_);
 }
