@@ -193,7 +193,7 @@ void engine::hook_team_booster()
 		WriteProcessMemory(handle_, (LPVOID)speed_value_alloc_, &default_value, sizeof(default_value), nullptr);
 
 		constexpr auto team_booster_asm = util::array_from_string(TEAM_BOOSTER_ASM);
-		*(uint64_t*)(team_booster_asm.data() + 0x3F + 6) = physx3_ + offset::client::physx3::speed + 0x15;
+		*(uint64_t*)(team_booster_asm.data() + 0x3F + 6) = client_ + offset::client::team_booster + 0x15;
 		WriteProcessMemory(handle_, (LPVOID)(team_booster_alloc_), team_booster_asm.data(), team_booster_asm.size(), nullptr);
 	}
 }
