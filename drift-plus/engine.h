@@ -22,4 +22,10 @@ private:
 	uint64_t physx3_ = 0;
 	uint64_t speed_alloc_ = 0;
 	uint64_t speed_value_alloc_ = 0;
+
+	void hook_booster();
+	void unhook_booster();
+
+	void hook_speed();
+	void unhook_speed();
 };

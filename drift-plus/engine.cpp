@@ -42,62 +42,15 @@ engine::engine()
 		return;
 	}
 
-	booster_alloc_ = (uint64_t)VirtualAllocEx(handle_, nullptr, 0x1000, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
-	PLOGI << xorstr_("Booster alloc: ") << std::hex << booster_alloc_;
-	if (client_ && booster_alloc_)
-	{
-		booster_value_alloc_ = booster_alloc_ + 0x500;
-		constexpr float default_value = 1.0f;
-		WriteProcessMemory(handle_, (LPVOID)booster_value_alloc_, &default_value, sizeof(default_value), nullptr);
-
-		constexpr auto booster_asm = util::array_from_string(BOOSTER_ASM);
-		*(uint64_t*)(booster_asm.data() + 0x1C + 6) = client_ + offset::client::booster + 0x14;
-		WriteProcessMemory(handle_, (LPVOID)(booster_alloc_), booster_asm.data(), booster_asm.size(), nullptr);
-
-		constexpr auto jmp_asm = util::array_from_string(JMP_ASM);
-		*(uint64_t*)(jmp_asm.data() + 6) = booster_alloc_;
-		WriteProcessMemory(handle_, (LPVOID)(client_ + offset::client::booster), jmp_asm.data(), jmp_asm.size(), nullptr);
-	}
-
-	speed_alloc_ = (uint64_t)VirtualAllocEx(handle_, nullptr, 0x1000, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
-	PLOGI << xorstr_("Speed alloc: ") << std::hex << speed_alloc_;
-	if (physx3_ && speed_alloc_)
-	{
-		speed_value_alloc_ = speed_alloc_ + 0x500;
-		constexpr float default_value = 1.0f;
-		WriteProcessMemory(handle_, (LPVOID)speed_value_alloc_, &default_value, sizeof(default_value), nullptr);
-
-		constexpr auto speed_asm = util::array_from_string(SPEED_ASM);
-		*(uint64_t*)(speed_asm.data() + 0x17 + 6) = physx3_ + offset::client::physx3::speed + 0xF;
-		WriteProcessMemory(handle_, (LPVOID)(speed_alloc_), speed_asm.data(), speed_asm.size(), nullptr);
-
-		constexpr auto jmp_asm = util::array_from_string(JMP_ASM);
-		*(uint64_t*)(jmp_asm.data() + 6) = speed_alloc_;
-		WriteProcessMemory(handle_, (LPVOID)(physx3_ + offset::client::physx3::speed), jmp_asm.data(), jmp_asm.size(), nullptr);
-	}
+	hook_booster();
+	hook_speed();
 }
 
 engine::~engine()
 {
 	disable_crash_guard();
-	booster(1.0f);
-	speed(1.0f);
-
-	if (booster_alloc_)
-	{
-		constexpr auto origin_asm = util::array_from_string(BOOSTER_ORIGIN_ASM);
-		WriteProcessMemory(handle_, (LPVOID)(client_ + offset::client::booster), origin_asm.data(), origin_asm.size(), nullptr);
-		VirtualFreeEx(handle_, (LPVOID)booster_alloc_, 0, MEM_RELEASE);
-	}
-
-	if (speed_alloc_)
-	{
-		constexpr auto origin_asm = util::array_from_string(SPEED_ORIGIN_ASM);
-		WriteProcessMemory(handle_, (LPVOID)(physx3_ + offset::client::physx3::speed), origin_asm.data(), origin_asm.size(), nullptr);
-		VirtualFreeEx(handle_, (LPVOID)speed_alloc_, 0, MEM_RELEASE);
-	}
-
-	
+	unhook_booster();
+	unhook_speed();
 
 	if (handle_)
 		CloseHandle(handle_);
@@ -123,4 +76,64 @@ void engine::booster(float value)
 void engine::speed(float value)
 {
 	WriteProcessMemory(handle_, (LPVOID)speed_value_alloc_, &value, sizeof(value), nullptr);
+}
+
+void engine::hook_booster()
+{
+	booster_alloc_ = (uint64_t)VirtualAllocEx(handle_, nullptr, 0x1000, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+	PLOGI << xorstr_("Booster alloc: ") << std::hex << booster_alloc_;
+	if (client_ && booster_alloc_)
+	{
+		booster_value_alloc_ = booster_alloc_ + 0x500;
+		constexpr float default_value = 1.0f;
+		WriteProcessMemory(handle_, (LPVOID)booster_value_alloc_, &default_value, sizeof(default_value), nullptr);
+
+		constexpr auto booster_asm = util::array_from_string(BOOSTER_ASM);
+		*(uint64_t*)(booster_asm.data() + 0x1C + 6) = client_ + offset::client::booster + 0x14;
+		WriteProcessMemory(handle_, (LPVOID)(booster_alloc_), booster_asm.data(), booster_asm.size(), nullptr);
+
+		constexpr auto jmp_asm = util::array_from_string(JMP_ASM);
+		*(uint64_t*)(jmp_asm.data() + 6) = booster_alloc_;
+		WriteProcessMemory(handle_, (LPVOID)(client_ + offset::client::booster), jmp_asm.data(), jmp_asm.size(), nullptr);
+	}
+}
+
+void engine::unhook_booster()
+{
+	if (booster_alloc_)
+	{
+		constexpr auto origin_asm = util::array_from_string(BOOSTER_ORIGIN_ASM);
+		WriteProcessMemory(handle_, (LPVOID)(client_ + offset::client::booster), origin_asm.data(), origin_asm.size(), nullptr);
+		VirtualFreeEx(handle_, (LPVOID)booster_alloc_, 0, MEM_RELEASE);
+	}
+}
+
+void engine::hook_speed()
+{
+	speed_alloc_ = (uint64_t)VirtualAllocEx(handle_, nullptr, 0x1000, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+	PLOGI << xorstr_("Speed alloc: ") << std::hex << speed_alloc_;
+	if (speed_alloc_)
+	{
+		speed_value_alloc_ = speed_alloc_ + 0x500;
+		constexpr float default_value = 1.0f;
+		WriteProcessMemory(handle_, (LPVOID)speed_value_alloc_, &default_value, sizeof(default_value), nullptr);
+
+		constexpr auto speed_asm = util::array_from_string(SPEED_ASM);
+		*(uint64_t*)(speed_asm.data() + 0x17 + 6) = physx3_ + offset::client::physx3::speed + 0xF;
+		WriteProcessMemory(handle_, (LPVOID)(speed_alloc_), speed_asm.data(), speed_asm.size(), nullptr);
+
+		constexpr auto jmp_asm = util::array_from_string(JMP_ASM);
+		*(uint64_t*)(jmp_asm.data() + 6) = speed_alloc_;
+		WriteProcessMemory(handle_, (LPVOID)(physx3_ + offset::client::physx3::speed), jmp_asm.data(), jmp_asm.size(), nullptr);
+	}
+}
+
+void engine::unhook_speed()
+{
+	if (speed_alloc_)
+	{
+		constexpr auto origin_asm = util::array_from_string(SPEED_ORIGIN_ASM);
+		WriteProcessMemory(handle_, (LPVOID)(physx3_ + offset::client::physx3::speed), origin_asm.data(), origin_asm.size(), nullptr);
+		VirtualFreeEx(handle_, (LPVOID)speed_alloc_, 0, MEM_RELEASE);
+	}
 }
