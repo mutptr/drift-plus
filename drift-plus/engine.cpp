@@ -185,7 +185,7 @@ void engine::unhook_speed()
 void engine::hook_team_booster()
 {
 	team_booster_alloc_ = (uint64_t)VirtualAllocEx(handle_, nullptr, 0x1000, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
-	PLOGI << xorstr_("team_booster_alloc_: ") << std::hex << speed_alloc_;
+	PLOGI << xorstr_("team_booster_alloc_: ") << std::hex << team_booster_alloc_;
 	if (team_booster_alloc_)
 	{
 		team_booster_value_alloc_ = team_booster_alloc_ + 0x500;
