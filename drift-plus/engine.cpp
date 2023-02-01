@@ -7,13 +7,16 @@
 
 #define PROCESS_NAME xorstr_(L"KartDrift-Win64-Shipping.exe")
 
-#define BOOSTER_ASM			"45 84 C0 74 0A 0F 28 C2 F3 0F 58 C2 0F 28 D0 F3 0F 58 49 18 F3 0F 59 15 E4 04 00 00 FF 25 00 00 00 00 3D 49 40 41 01 00 00 00"
-#define BOOSTER_ORIGIN_ASM	"45 84 C0 74 0A 0F 28 C2 F3 0F 58 C2 0F 28"
+#define BOOSTER_ASM					"45 84 C0 74 0A 0F 28 C2 F3 0F 58 C2 0F 28 D0 F3 0F 58 49 18 F3 0F 59 15 E4 04 00 00 FF 25 00 00 00 00 3D 49 40 41 01 00 00 00"
+#define BOOSTER_ORIGIN_ASM			"45 84 C0 74 0A 0F 28 C2 F3 0F 58 C2 0F 28"
 
-#define SPEED_ASM			"F3 0F 59 05 F8 04 00 00 F3 0F 59 F0 0F 28 FA F3 0F 59 F8 44 0F 28 C3 FF 25 00 00 00 00 F5 3F D7 11 FE 7F 00 00"
-#define SPEED_ORIGIN_ASM	"F3 0F 59 F0 0F 28 FA F3 0F 59 F8 44 0F 28"
+#define SPEED_ASM					"F3 0F 59 05 F8 04 00 00 F3 0F 59 F0 0F 28 FA F3 0F 59 F8 44 0F 28 C3 FF 25 00 00 00 00 F5 3F D7 11 FE 7F 00 00"
+#define SPEED_ORIGIN_ASM			"F3 0F 59 F0 0F 28 FA F3 0F 59 F8 44 0F 28"
 
-#define JMP_ASM				"FF 25 00 00 00 00 CC CC CC CC CC CC CC CC"
+#define TEAM_BOOSTER_ASM			"FF 05 FA 05 00 00 83 3D F3 05 00 00 50 0F 86 17 00 00 00 C7 05 E3 05 00 00 00 00 00 00 F3 0F 10 35 DB 04 00 00 E9 08 00 00 00 F3 0F 10 B3 D0 00 00 00 0F 2F F0 C7 83 D0 00 00 00 00 00 00 00 FF 25 00 00 00 00 CC 89 40 41 01 00 00 00"
+#define TEAM_BOOSTER_ORIGIN_ASM		"F3 0F 10 B3 D0 00 00 00 0F 2F F0 C7 83 D0"
+
+#define JMP_ASM						"FF 25 00 00 00 00 CC CC CC CC CC CC CC CC"
 
 engine::engine()
 {
@@ -44,6 +47,7 @@ engine::engine()
 
 	hook_booster();
 	hook_speed();
+	hook_team_booster();
 }
 
 engine::~engine()
@@ -51,6 +55,7 @@ engine::~engine()
 	disable_crash_guard();
 	unhook_booster();
 	unhook_speed();
+	unhook_team_booster();
 
 	if (handle_)
 		CloseHandle(handle_);
@@ -68,6 +73,45 @@ void engine::disable_crash_guard()
 	WriteProcessMemory(handle_, (LPVOID)(client_ + offset::client::crash_guard), arr.data(), arr.size(), nullptr);
 }
 
+void engine::enable_smooth_drift()
+{
+	constexpr auto arr = util::array_from_string("F3 0F 5C");
+	WriteProcessMemory(handle_, (LPVOID)(client_ + offset::client::smooth_drift), arr.data(), arr.size(), nullptr);
+}
+
+void engine::disable_smooth_drift()
+{
+	constexpr auto arr = util::array_from_string("F3 0F 58");
+	WriteProcessMemory(handle_, (LPVOID)(client_ + offset::client::smooth_drift), arr.data(), arr.size(), nullptr);
+}
+
+void engine::enable_team_booster()
+{
+	constexpr auto jmp_asm = util::array_from_string(JMP_ASM);
+	*(uint64_t*)(jmp_asm.data() + 6) = team_booster_alloc_;
+	WriteProcessMemory(handle_, (LPVOID)(client_ + offset::client::team_booster), jmp_asm.data(), jmp_asm.size(), nullptr);
+}
+
+void engine::disable_team_booster()
+{
+	constexpr auto origin_asm = util::array_from_string(TEAM_BOOSTER_ORIGIN_ASM);
+	WriteProcessMemory(handle_, (LPVOID)(client_ + offset::client::team_booster), origin_asm.data(), origin_asm.size(), nullptr);
+}
+
+void engine::enable_body()
+{
+	constexpr auto arr = util::array_from_string("C3");
+	WriteProcessMemory(handle_, (LPVOID)(client_ + offset::client::body1), arr.data(), arr.size(), nullptr);
+	WriteProcessMemory(handle_, (LPVOID)(client_ + offset::client::body2), arr.data(), arr.size(), nullptr);
+}
+
+void engine::disable_body()
+{
+	constexpr auto arr = util::array_from_string("4C");
+	WriteProcessMemory(handle_, (LPVOID)(client_ + offset::client::body1), arr.data(), arr.size(), nullptr);
+	WriteProcessMemory(handle_, (LPVOID)(client_ + offset::client::body2), arr.data(), arr.size(), nullptr);
+}
+
 void engine::booster(float value)
 {
 	WriteProcessMemory(handle_, (LPVOID)booster_value_alloc_, &value, sizeof(value), nullptr);
@@ -81,7 +125,7 @@ void engine::speed(float value)
 void engine::hook_booster()
 {
 	booster_alloc_ = (uint64_t)VirtualAllocEx(handle_, nullptr, 0x1000, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
-	PLOGI << xorstr_("Booster alloc: ") << std::hex << booster_alloc_;
+	PLOGI << xorstr_("booster_alloc_: ") << std::hex << booster_alloc_;
 	if (client_ && booster_alloc_)
 	{
 		booster_value_alloc_ = booster_alloc_ + 0x500;
@@ -111,7 +155,7 @@ void engine::unhook_booster()
 void engine::hook_speed()
 {
 	speed_alloc_ = (uint64_t)VirtualAllocEx(handle_, nullptr, 0x1000, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
-	PLOGI << xorstr_("Speed alloc: ") << std::hex << speed_alloc_;
+	PLOGI << xorstr_("speed_alloc_: ") << std::hex << speed_alloc_;
 	if (speed_alloc_)
 	{
 		speed_value_alloc_ = speed_alloc_ + 0x500;
@@ -135,5 +179,30 @@ void engine::unhook_speed()
 		constexpr auto origin_asm = util::array_from_string(SPEED_ORIGIN_ASM);
 		WriteProcessMemory(handle_, (LPVOID)(physx3_ + offset::client::physx3::speed), origin_asm.data(), origin_asm.size(), nullptr);
 		VirtualFreeEx(handle_, (LPVOID)speed_alloc_, 0, MEM_RELEASE);
+	}
+}
+
+void engine::hook_team_booster()
+{
+	team_booster_alloc_ = (uint64_t)VirtualAllocEx(handle_, nullptr, 0x1000, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+	PLOGI << xorstr_("team_booster_alloc_: ") << std::hex << speed_alloc_;
+	if (team_booster_alloc_)
+	{
+		team_booster_value_alloc_ = team_booster_alloc_ + 0x500;
+		constexpr float default_value = 3570.0f;
+		WriteProcessMemory(handle_, (LPVOID)speed_value_alloc_, &default_value, sizeof(default_value), nullptr);
+
+		constexpr auto team_booster_asm = util::array_from_string(TEAM_BOOSTER_ASM);
+		*(uint64_t*)(team_booster_asm.data() + 0x3F + 6) = physx3_ + offset::client::physx3::speed + 0x15;
+		WriteProcessMemory(handle_, (LPVOID)(team_booster_alloc_), team_booster_asm.data(), team_booster_asm.size(), nullptr);
+	}
+}
+
+void engine::unhook_team_booster()
+{
+	if (team_booster_alloc_)
+	{
+		disable_team_booster();
+		VirtualFreeEx(handle_, (LPVOID)team_booster_alloc_, 0, MEM_RELEASE);
 	}
 }

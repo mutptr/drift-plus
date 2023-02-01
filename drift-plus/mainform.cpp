@@ -21,7 +21,7 @@ mainform::mainform(engine* eng)
 	};
 
 	booster_.move({ 20, 20, 160, 25 });
-	booster_.caption(xorstr_("부스터"));
+	booster_.caption(xorstr_("부스터 조절"));
 	auto booster_click = [&, booster_value_click]
 	{
 		if (booster_.checked())
@@ -35,17 +35,6 @@ mainform::mainform(engine* eng)
 	};
 	booster_.events().click(booster_click);
 
-	crash_guard_.move({ 200, 20, 160, 25 });
-	crash_guard_.caption(xorstr_("부스터 손실 제거"));
-	auto crash_guard_click = [&]
-	{
-		crash_guard_.checked() ?
-			eng->enable_crash_guard() :
-			eng->disable_crash_guard();
-	};
-	crash_guard_.events().click(crash_guard_click);
-
-
 	booster_value_.move({ 20, 50, 360, 25 });
 	booster_value_.caption(xorstr_("1.0"));
 	booster_value_.multi_lines(false);
@@ -53,7 +42,7 @@ mainform::mainform(engine* eng)
 
 
 	speed_.move({ 20, 100, 160, 25 });
-	speed_.caption(xorstr_("스피드"));
+	speed_.caption(xorstr_("스피드 조절"));
 	speed_space_.move({ 200, 100, 160, 25 });
 	speed_space_.caption(xorstr_("Space"));
 
@@ -92,6 +81,46 @@ mainform::mainform(engine* eng)
 			}
 		}
 	} };
+
+	crash_guard_.move({ 20, 180, 160, 25 });
+	crash_guard_.caption(xorstr_("부스터 손실 제거"));
+	auto crash_guard_click = [&]
+	{
+		crash_guard_.checked() ?
+			eng->enable_crash_guard() :
+			eng->disable_crash_guard();
+	};
+	crash_guard_.events().click(crash_guard_click);
+
+	team_booster_.move({ 200, 180, 160, 25 });
+	team_booster_.caption(xorstr_("팀부 무한"));
+	auto team_booster_click = [&]
+	{
+		team_booster_.checked() ?
+			eng->enable_team_booster() :
+			eng->disable_team_booster();
+	};
+	team_booster_.events().click(team_booster_click);
+
+	smooth_drift_.move({ 20, 210, 160, 25 });
+	smooth_drift_.caption(xorstr_("드리프트 끌기"));
+	auto smooth_drift_click = [&]
+	{
+		smooth_drift_.checked() ?
+			eng->enable_smooth_drift() :
+			eng->disable_smooth_drift();
+	};
+	smooth_drift_.events().click(smooth_drift_click);
+
+	body_.move({ 200, 210, 160, 25 });
+	body_.caption(xorstr_("몸빵"));
+	auto body_click = [&]
+	{
+		body_.checked() ?
+			eng->enable_body() :
+			eng->disable_body();
+	};
+	body_.events().click(body_click);
 }
 
 mainform::~mainform()
