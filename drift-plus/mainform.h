@@ -19,8 +19,6 @@ private:
 
 	nana::checkbox crash_guard_{ *this };
 	nana::checkbox team_booster_{ *this };
-	nana::checkbox smooth_drift_{ *this };
-	nana::checkbox body_{ *this };
 
 
 	constexpr static float default_value_ = 1.0f;

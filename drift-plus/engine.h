@@ -9,14 +9,8 @@ public:
 	void enable_crash_guard();
 	void disable_crash_guard();
 
-	void enable_smooth_drift();
-	void disable_smooth_drift();
-
 	void enable_team_booster();
 	void disable_team_booster();
-
-	void enable_body();
-	void disable_body();
 
 	void booster(float value);
 	void speed(float value);

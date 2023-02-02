@@ -73,18 +73,6 @@ void engine::disable_crash_guard()
 	WriteProcessMemory(handle_, (LPVOID)(client_ + offset::client::crash_guard), arr.data(), arr.size(), nullptr);
 }
 
-void engine::enable_smooth_drift()
-{
-	constexpr auto arr = util::array_from_string("F3 0F 5C");
-	WriteProcessMemory(handle_, (LPVOID)(client_ + offset::client::smooth_drift), arr.data(), arr.size(), nullptr);
-}
-
-void engine::disable_smooth_drift()
-{
-	constexpr auto arr = util::array_from_string("F3 0F 58");
-	WriteProcessMemory(handle_, (LPVOID)(client_ + offset::client::smooth_drift), arr.data(), arr.size(), nullptr);
-}
-
 void engine::enable_team_booster()
 {
 	constexpr auto jmp_asm = util::array_from_string(JMP_ASM);
@@ -96,20 +84,6 @@ void engine::disable_team_booster()
 {
 	constexpr auto origin_asm = util::array_from_string(TEAM_BOOSTER_ORIGIN_ASM);
 	WriteProcessMemory(handle_, (LPVOID)(client_ + offset::client::team_booster), origin_asm.data(), origin_asm.size(), nullptr);
-}
-
-void engine::enable_body()
-{
-	constexpr auto arr = util::array_from_string("C3");
-	WriteProcessMemory(handle_, (LPVOID)(client_ + offset::client::body1), arr.data(), arr.size(), nullptr);
-	WriteProcessMemory(handle_, (LPVOID)(client_ + offset::client::body2), arr.data(), arr.size(), nullptr);
-}
-
-void engine::disable_body()
-{
-	constexpr auto arr = util::array_from_string("4C");
-	WriteProcessMemory(handle_, (LPVOID)(client_ + offset::client::body1), arr.data(), arr.size(), nullptr);
-	WriteProcessMemory(handle_, (LPVOID)(client_ + offset::client::body2), arr.data(), arr.size(), nullptr);
 }
 
 void engine::booster(float value)

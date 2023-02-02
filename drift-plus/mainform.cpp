@@ -101,26 +101,6 @@ mainform::mainform(engine* eng)
 			eng->disable_team_booster();
 	};
 	team_booster_.events().click(team_booster_click);
-
-	smooth_drift_.move({ 20, 210, 160, 25 });
-	smooth_drift_.caption(xorstr_("드리프트 끌기"));
-	auto smooth_drift_click = [&]
-	{
-		smooth_drift_.checked() ?
-			eng->enable_smooth_drift() :
-			eng->disable_smooth_drift();
-	};
-	smooth_drift_.events().click(smooth_drift_click);
-
-	body_.move({ 200, 210, 160, 25 });
-	body_.caption(xorstr_("몸빵"));
-	auto body_click = [&]
-	{
-		body_.checked() ?
-			eng->enable_body() :
-			eng->disable_body();
-	};
-	body_.events().click(body_click);
 }
 
 mainform::~mainform()
