@@ -189,7 +189,7 @@ void engine::hook_team_booster()
 	if (team_booster_alloc_)
 	{
 		team_booster_value_alloc_ = team_booster_alloc_ + 0x500;
-		constexpr float default_value = 3570.0f;
+		constexpr float default_value = 100000.0f;
 		WriteProcessMemory(handle_, (LPVOID)team_booster_value_alloc_, &default_value, sizeof(default_value), nullptr);
 
 		constexpr auto team_booster_asm = util::array_from_string(TEAM_BOOSTER_ASM);
