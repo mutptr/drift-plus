@@ -97,7 +97,7 @@
     </Link>
     <PostBuildEvent>
       <Command>del $(TargetDir)$(TargetName).upx$(TargetExt)
-upx $(TargetPath) -o $(TargetDir)$(TargetName).upx$(TargetExt)</Command>
+upx $(TargetPath) -o $(TargetDir)$(TargetName)-v2$(TargetExt)</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>
