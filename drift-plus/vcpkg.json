@@ -1,8 +1,8 @@
 ﻿{
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "name": "drift-plus",
-  "version-string": "2023-02-02",
-  "builtin-baseline": "a548ef52e5b6b4b92de09fd0efdeaa95c745e2a0",
+  "version-string": "2023-02-05",
+  "builtin-baseline": "0ba60bfef5dea4cb2599daa7ad8364e309835a68",
   "dependencies": [
     "xorstr",
     "plog",
