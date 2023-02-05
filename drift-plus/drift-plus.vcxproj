@@ -96,7 +96,7 @@
       <AdditionalOptions>/BREPRO /DEPENDENTLOADFLAG:0x800 /PDBALTPATH:%_PDB% %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
-      <Command>del $(TargetDir)$(TargetName).upx$(TargetExt)
+      <Command>del $(TargetDir)$(TargetName)-v2$(TargetExt)
 upx $(TargetPath) -o $(TargetDir)$(TargetName)-v2$(TargetExt)</Command>
     </PostBuildEvent>
     <PostBuildEvent>
