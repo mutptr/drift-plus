@@ -11,14 +11,17 @@ uint32_t util::find_process_by_name(std::wstring_view name)
 	PROCESSENTRY32 entry{};
 	entry.dwSize = sizeof(entry);
 
-	if (!Process32First(snapshot, &entry))
-		return 0;
-
-	do
+	if (Process32First(snapshot, &entry))
 	{
-		if (_wcsicmp(entry.szExeFile, name.data()) == 0)
-			return entry.th32ProcessID;
-	} while (Process32Next(snapshot, &entry));
+		do
+		{
+			if (_wcsicmp(entry.szExeFile, name.data()) == 0)
+			{
+				CloseHandle(snapshot);
+				return entry.th32ProcessID;
+			}
+		} while (Process32Next(snapshot, &entry));
+	}
 
 	CloseHandle(snapshot);
 
@@ -34,14 +37,17 @@ uintptr_t util::find_module_by_name(uint32_t process_id, std::wstring_view name)
 	MODULEENTRY32 entry{};
 	entry.dwSize = sizeof(entry);
 
-	if (!Module32First(snapshot, &entry))
-		return 0;
-
-	do
+	if (Module32First(snapshot, &entry))
 	{
-		if (_wcsicmp(entry.szModule, name.data()) == 0)
-			return (uintptr_t)entry.modBaseAddr;
-	} while (Module32Next(snapshot, &entry));
+		do
+		{
+			if (_wcsicmp(entry.szModule, name.data()) == 0)
+			{
+				CloseHandle(snapshot);
+				return (uintptr_t)entry.modBaseAddr;
+			}
+		} while (Module32Next(snapshot, &entry));
+	}
 
 	CloseHandle(snapshot);
 
